@@ -71,7 +71,7 @@ namespace Store.Presentation.Controllers
             order.GetItem(bookId).Count = count;
             SaveOrderAndCart(order, cart);
 
-            return RedirectToAction("Index", "Book", new { bookId });
+            return RedirectToAction("Index", "Order");
         }
 
         private (Order order, Cart cart) GetOrCreateOrderOrCart()
@@ -97,14 +97,14 @@ namespace Store.Presentation.Controllers
             HttpContext.Session.Set(cart);
         }
         
-        public IActionResult RemoveItem(int id)
+        public IActionResult RemoveItem(int bookId)
         {
             (Order order, Cart cart) = GetOrCreateOrderOrCart();
             
-            order.RemoveItem(id);
+            order.RemoveItem(bookId);
             SaveOrderAndCart(order, cart);
 
-            return RedirectToAction("Index", "Book", new { id });
+            return RedirectToAction("Index", "Order");
 
         }
 
