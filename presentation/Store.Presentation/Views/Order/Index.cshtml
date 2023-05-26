@@ -46,9 +46,9 @@
 
 
 <form action="@Url.Action("SendConfirmationCode")" method="post">
-    <input type="hidden" name="id" value="@Model.Id"/>
+    <input type="hidden" name="id" value="@Model.Id" />
     <div class="form-group">
-        <label for="CellPhone">Мобильный телефон</label>
+        <label for="cellPhone">Мобильный телефон</label>
         <input type="text" class="form-control" name="cellPhone" value="+79876543210" />
         @if (Model.Errors.ContainsKey("cellPhone"))
         {
