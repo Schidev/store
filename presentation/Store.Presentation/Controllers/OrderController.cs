@@ -110,16 +110,16 @@ namespace Store.Presentation.Controllers
             else
             {
                 order = orderRepository.Create();
-                cart = new Cart(order.Id);
+                cart = new Cart(order.Id, 0, 0m);
             }
             return (order, cart);
         }
         private void SaveOrderAndCart(Order order, Cart cart)
         {
             orderRepository.Update(order);
+            
+            cart = new Cart(order.Id, order.TotalCount, order.TotalPrice);
 
-            cart.TotalCount = order.TotalCount;
-            cart.TotalPrice = order.TotalPrice;
             HttpContext.Session.Set(cart);
         }
 
