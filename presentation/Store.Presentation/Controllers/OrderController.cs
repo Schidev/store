@@ -76,7 +76,15 @@ namespace Store.Presentation.Controllers
 
             var book = bookRepository.GetById(bookId);
 
-            order.AddOrUpdateItem(book, count);
+            if (order.Items.TryGet(bookId, out OrderItem orderItem))
+            {
+                orderItem.Count += count;
+            }
+            else
+            {
+                order.Items.Add(bookId, book.Price, count);
+            }
+
             SaveOrderAndCart(order, cart);
             return RedirectToAction("Index","Book", new { id = bookId});
         }
@@ -86,7 +94,7 @@ namespace Store.Presentation.Controllers
         {
             (Order order, Cart cart) = GetOrCreateOrderOrCart();
 
-            order.GetItem(bookId).Count = count;
+            order.Items.Get(bookId).Count = count;
             SaveOrderAndCart(order, cart);
 
             return RedirectToAction("Index", "Order");
@@ -120,7 +128,7 @@ namespace Store.Presentation.Controllers
         {
             (Order order, Cart cart) = GetOrCreateOrderOrCart();
             
-            order.RemoveItem(bookId);
+            order.Items.Remove(bookId);
             SaveOrderAndCart(order, cart);
 
             return RedirectToAction("Index", "Order");
