@@ -4,6 +4,7 @@ using Store.Presentation.Models;
 using Store.Messages;
 using Store.Contractors;
 using System.Text.RegularExpressions;
+using Store.Web.Presentation;
 
 namespace Store.Presentation.Controllers
 {
@@ -12,16 +13,22 @@ namespace Store.Presentation.Controllers
         private readonly IBookRepository bookRepository;
         private readonly IOrderRepository orderRepository;
         private readonly IEnumerable<IDeliveryService> deliveryServices;
+        private readonly IEnumerable<IPaymentService> paymentServices;
+        private readonly IEnumerable<IWebContractorService> webConstractorServices;
         private INotificationService notificationService;
 
         public OrderController(IBookRepository bookRepository, 
                                 IOrderRepository orderRepository,
                                 IEnumerable<IDeliveryService> deliveryServices,
+                                IEnumerable<IPaymentService> paymentServices,
+                                IEnumerable<IWebContractorService> webConstractorServices,
                                 INotificationService notificationService)
         {
             this.bookRepository = bookRepository;
             this.orderRepository = orderRepository;
             this.deliveryServices = deliveryServices;
+            this.paymentServices = paymentServices;
+            this.webConstractorServices = webConstractorServices;
             this.notificationService = notificationService;
         }
 
@@ -188,7 +195,9 @@ namespace Store.Presentation.Controllers
                      });
             }
 
-            // todo: save Cell Phone
+            var order = orderRepository.GetById(id);
+            order.CellPhone = cellPhone;
+            orderRepository.Update(order);
 
             HttpContext.Session.Remove(cellPhone);
 
@@ -218,17 +227,72 @@ namespace Store.Presentation.Controllers
         { 
             var deliveryService = deliveryServices.Single(service => service.UniqueCode == uniqueCode);
 
-            var form = deliveryService.MoveNext(id, step, values);
+            var form = deliveryService.MoveNextForm(id, step, values);
 
             if (form.IsFinal)
             {
-                // todo: later
-                return null;
+                var order = orderRepository.GetById(id);
+                order.Delivery = deliveryService.GetDelivery(form);
+                orderRepository.Update(order);
+
+                var model = new DeliveryModel()
+                {
+                    OrderId = id,
+                    Methods = paymentServices.ToDictionary(service => service.UniqueCode,
+                                                           service => service.Title)
+                };
+
+                return View("PaymentMethod", model);
+
             }
 
             return View("DeliveryStep", form);
+        }
+
+        [HttpPost]
+        public IActionResult StartPayment(int id, string uniqueCode)
+        {
+            var paymentService = paymentServices.Single(service => service.UniqueCode == uniqueCode);
+            var order = orderRepository.GetById(id);
+
+            var form = paymentService.CreateForm(order);
+
+            var webConstractorService = webConstractorServices.SingleOrDefault(service => service.UniqueCode == uniqueCode);
+
+            if (webConstractorService != null)
+            {
+                return Redirect(webConstractorService.Uri);
+            }
+
+            return View("PaymentStep", form);
+        }
+
+        [HttpPost]
+        public IActionResult NextPayment(int id, string uniqueCode, int step, Dictionary<string, string> values)
+        {
+            var paymentService = paymentServices.Single(service => service.UniqueCode == uniqueCode);
+
+            var form = paymentService.MoveNextForm(id, step, values);
+
+            if (form.IsFinal)
+            {
+                var order = orderRepository.GetById(id);
+                order.Payment = paymentService.GetPayment(form);
+                orderRepository.Update(order);
+
+                return View("Finish");
+            }
+
+            return View("PaymentStep", form);
 
 
+        }
+
+        public IActionResult Finish()
+        {
+            HttpContext.Session.RemoveCart();
+
+            return View();
         }
 
     }
