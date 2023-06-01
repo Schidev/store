@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Store.Data;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +10,19 @@ namespace Store
 {
     public class OrderItemCollection : IReadOnlyCollection<OrderItem>
     {
+        private readonly OrderDto orderDto;
         private readonly List<OrderItem> items;
 
-        public OrderItemCollection(IEnumerable<OrderItem> items)
+        public OrderItemCollection(OrderDto orderDto)
         {
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
-            }
+            if (orderDto == null)
+                throw new ArgumentNullException(nameof(orderDto));
 
-            this.items = new List<OrderItem>(items);
+            this.orderDto = orderDto;
+
+            items = orderDto.Items
+                            .Select(OrderItem.Mapper.Map)
+                            .ToList();
         }
 
         public int Count => items.Count;
@@ -54,14 +58,23 @@ namespace Store
                 throw new InvalidOperationException("Book already exists.");
             }
 
-            orderItem = new OrderItem(bookId, count, price);
+            var orderItemDto = OrderItem.DtoFactory.Create(orderDto, bookId, price, count);
+            orderDto.Items.Add(orderItemDto);
+
+            orderItem = OrderItem.Mapper.Map(orderItemDto);
             items.Add(orderItem);
+
             return orderItem;
         }
 
         public void Remove(int bookId)
         {
-            items.Remove(Get(bookId));
+            var index = items.FindIndex(item => item.BookId == bookId);
+            if (index == -1)
+                throw new InvalidOperationException("Can't find book to remove from order.");
+
+            orderDto.Items.RemoveAt(index);
+            items.RemoveAt(index);
         }
 
 
