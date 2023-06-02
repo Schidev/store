@@ -2,8 +2,10 @@ using Store;
 using Store.Contractors;
 using Store.Messages;
 using Store.Web.App;
+using Store.Data.EF;
 using Store.Web.Presentation;
 using Store.YandexKassa;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,8 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+builder.Services.AddEfRepositories(builder.Configuration.GetConnectionString("Store"));
 
 builder.Services.AddSingleton<INotificationService, DebugNotificationService>();
 builder.Services.AddSingleton<IDeliveryService, PostamateDeliveryService>();

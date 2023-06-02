@@ -111,6 +111,8 @@ namespace Store.Web.App
             {
                 order.Items.Add(book.Id, book.Price, count);
             }
+
+            orderRepository.Update(order);
         }
 
         internal void UpdateSession(Order order)
