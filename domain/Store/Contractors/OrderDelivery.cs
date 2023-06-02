@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 namespace Store
 {
     public class OrderDelivery
-    { 
-        public string UniqueCode { get;}
+    {
+        public string UniqueCode { get; }
+
         public string Description { get; }
-        public decimal Amount { get; }
+
+        public decimal Price { get; }
+
         public IReadOnlyDictionary<string, string> Parameters { get; }
 
         public OrderDelivery(string uniqueCode,
@@ -19,25 +22,18 @@ namespace Store
                              IReadOnlyDictionary<string, string> parameters)
         {
             if (string.IsNullOrWhiteSpace(uniqueCode))
-            {
                 throw new ArgumentException(nameof(uniqueCode));
-            }
 
-            if (string.IsNullOrWhiteSpace(description)) 
-            {
+            if (string.IsNullOrWhiteSpace(description))
                 throw new ArgumentException(nameof(description));
-            }
 
             if (parameters == null)
-            {
                 throw new ArgumentNullException(nameof(parameters));
-            }
 
-            this.UniqueCode = uniqueCode;
-            this.Description = description;
-            this.Amount = amount;
-            this.Parameters = parameters;
-
+            UniqueCode = uniqueCode;
+            Description = description;
+            Price = amount;
+            Parameters = parameters;
         }
     }
 }
