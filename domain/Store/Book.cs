@@ -6,7 +6,9 @@ namespace Store
     public class Book
     {
         private readonly BookDto dto;
+
         public int Id => dto.Id;
+
         public string Isbn
         {
             get => dto.Isbn;
@@ -24,6 +26,7 @@ namespace Store
             get => dto.Author;
             set => dto.Author = value?.Trim();
         }
+
         public string Title
         {
             get => dto.Title;
@@ -35,16 +38,19 @@ namespace Store
                 dto.Title = value.Trim();
             }
         }
+
         public string Description
         {
             get => dto.Description;
             set => dto.Description = value;
         }
+
         public decimal Price
         {
             get => dto.Price;
             set => dto.Price = value;
         }
+
         internal Book(BookDto dto)
         {
             this.dto = dto;
@@ -77,13 +83,9 @@ namespace Store
                                          decimal price)
             {
                 if (TryFormatIsbn(isbn, out string formattedIsbn))
-                {
                     isbn = formattedIsbn;
-                }
                 else
-                {
                     throw new ArgumentException(nameof(isbn));
-                }
 
                 if (string.IsNullOrWhiteSpace(title))
                     throw new ArgumentException(nameof(title));
@@ -96,14 +98,14 @@ namespace Store
                     Description = description?.Trim(),
                     Price = price,
                 };
-
             }
         }
 
-        public static class Mapper 
+        public static class Mapper
         {
             public static Book Map(BookDto dto) => new Book(dto);
+
             public static BookDto Map(Book domain) => domain.dto;
-        } 
+        }
     }
 }

@@ -35,7 +35,6 @@ namespace Store.Web.App
 
             model = null;
             return false;
-
         }
 
         internal bool TryGetOrder(out Order order)
@@ -45,6 +44,7 @@ namespace Store.Web.App
                 order = orderRepository.GetById(cart.OrderId);
                 return true;
             }
+
             order = null;
             return false;
         }
@@ -55,16 +55,16 @@ namespace Store.Web.App
             var items = from item in order.Items
                         join book in books on item.BookId equals book.Id
                         select new OrderItemModel
-                        { 
+                        {
                             BookId = book.Id,
                             Title = book.Title,
                             Author = book.Author,
                             Price = item.Price,
-                            Count = item.Count
+                            Count = item.Count,
                         };
 
-            return new OrderModel 
-            { 
+            return new OrderModel
+            {
                 Id = order.Id,
                 Items = items.ToArray(),
                 TotalCount = order.TotalCount,
@@ -78,39 +78,31 @@ namespace Store.Web.App
         internal IEnumerable<Book> GetBooks(Order order)
         {
             var bookIds = order.Items.Select(item => item.BookId);
+
             return bookRepository.GetAllByIds(bookIds);
         }
 
         public OrderModel AddBook(int bookId, int count)
         {
             if (count < 1)
-            {
-                throw new InvalidOperationException("Too few books to add.");
-            }
+                throw new InvalidOperationException("Too few books to add");
 
             if (!TryGetOrder(out Order order))
-            {
                 order = orderRepository.Create();
-            }
 
             AddOrUpdateBook(order, bookId, count);
             UpdateSession(order);
 
             return Map(order);
-
         }
 
         internal void AddOrUpdateBook(Order order, int bookId, int count)
-        { 
+        {
             var book = bookRepository.GetById(bookId);
             if (order.Items.TryGet(bookId, out OrderItem orderItem))
-            {
                 orderItem.Count += count;
-            }
             else
-            {
                 order.Items.Add(book.Id, book.Price, count);
-            }
 
             orderRepository.Update(order);
         }
@@ -119,13 +111,12 @@ namespace Store.Web.App
         {
             var cart = new Cart(order.Id, order.TotalCount, order.TotalPrice);
             Session.Set(cart);
-
         }
 
         public OrderModel UpdateBook(int bookId, int count)
         {
             var order = GetOrder();
-            order.Items.Get(bookId).Count += count;
+            order.Items.Get(bookId).Count = count;
 
             orderRepository.Update(order);
             UpdateSession(order);
@@ -147,9 +138,7 @@ namespace Store.Web.App
         public Order GetOrder()
         {
             if (TryGetOrder(out Order order))
-            {
                 return order;
-            }
 
             throw new InvalidOperationException("Empty session.");
         }
@@ -161,21 +150,19 @@ namespace Store.Web.App
 
             if (TryFormatPhone(cellPhone, out string formattedPhone))
             {
-                var confirmationCode = 1111; // todo: random.Next(1000, 10000)
+                var confirmationCode = 1111; // todo: random.Next(1000, 10000) = 1000, 1001, ..., 9998, 9999
                 model.CellPhone = formattedPhone;
-
                 Session.SetInt32(formattedPhone, confirmationCode);
                 notificationService.SendConfirmationCode(formattedPhone, confirmationCode);
             }
-            else 
-            {
+            else
                 model.Errors["cellPhone"] = "Номер телефона не соответствует формату +79876543210";
-            }
 
             return model;
         }
 
         private readonly PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
+
         internal bool TryFormatPhone(string cellPhone, out string formattedPhone)
         {
             try
@@ -213,6 +200,7 @@ namespace Store.Web.App
             orderRepository.Update(order);
 
             Session.Remove(cellPhone);
+
             return Map(order);
         }
 

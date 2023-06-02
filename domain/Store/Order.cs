@@ -11,7 +11,9 @@ namespace Store
     public class Order
     {
         private readonly OrderDto dto;
+
         public int Id => dto.Id;
+
         public string CellPhone
         {
             get => dto.CellPhone;
@@ -37,7 +39,6 @@ namespace Store
                     dto.DeliveryPrice,
                     dto.DeliveryParameters);
             }
-
             set
             {
                 if (value == null)
@@ -51,7 +52,7 @@ namespace Store
             }
         }
 
-        public OrderPayment Payment 
+        public OrderPayment Payment
         {
             get
             {
@@ -63,7 +64,6 @@ namespace Store
                     dto.PaymentDescription,
                     dto.PaymentParameters);
             }
-
             set
             {
                 if (value == null)
@@ -79,8 +79,9 @@ namespace Store
         public OrderItemCollection Items { get; }
 
         public int TotalCount => Items.Sum(item => item.Count);
+
         public decimal TotalPrice => Items.Sum(item => item.Price * item.Count)
-                                        + (Delivery?.Price ?? 0m);
+                                   + (Delivery?.Price ?? 0m);
 
         public Order(OrderDto dto)
         {
@@ -99,8 +100,5 @@ namespace Store
 
             public static OrderDto Map(Order domain) => domain.dto;
         }
-
-
-
     }
 }

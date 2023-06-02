@@ -12,7 +12,9 @@ namespace Store.Data.EF
     public class StoreDbContext : DbContext
     {
         public DbSet<BookDto> Books { get; set; }
+
         public DbSet<OrderDto> Orders { get; set; }
+
         public DbSet<OrderItemDto> OrderItems { get; set; }
 
         public StoreDbContext(DbContextOptions<StoreDbContext> options)
@@ -39,7 +41,7 @@ namespace Store.Data.EF
             });
         }
 
-        private void BuildOrders(ModelBuilder modelBuilder)
+        private static void BuildOrders(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<OrderDto>(action =>
             {
@@ -80,7 +82,7 @@ namespace Store.Data.EF
 
         private static void BuildBooks(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BookDto>(action => 
+            modelBuilder.Entity<BookDto>(action =>
             {
                 action.Property(dto => dto.Isbn)
                       .HasMaxLength(17)
@@ -123,8 +125,5 @@ namespace Store.Data.EF
                 );
             });
         }
-
-
-
     }
 }

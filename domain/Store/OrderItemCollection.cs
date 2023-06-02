@@ -27,12 +27,20 @@ namespace Store
 
         public int Count => items.Count;
 
+        public IEnumerator<OrderItem> GetEnumerator()
+        {
+            return items.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return (items as IEnumerable).GetEnumerator();
+        }
+
         public OrderItem Get(int bookId)
         {
             if (TryGet(bookId, out OrderItem orderItem))
-            {
                 return orderItem;
-            }
 
             throw new InvalidOperationException("Book not found.");
         }
@@ -40,7 +48,6 @@ namespace Store
         public bool TryGet(int bookId, out OrderItem orderItem)
         {
             var index = items.FindIndex(item => item.BookId == bookId);
-            
             if (index == -1)
             {
                 orderItem = null;
@@ -54,9 +61,7 @@ namespace Store
         public OrderItem Add(int bookId, decimal price, int count)
         {
             if (TryGet(bookId, out OrderItem orderItem))
-            {
                 throw new InvalidOperationException("Book already exists.");
-            }
 
             var orderItemDto = OrderItem.DtoFactory.Create(orderDto, bookId, price, count);
             orderDto.Items.Add(orderItemDto);
@@ -75,17 +80,6 @@ namespace Store
 
             orderDto.Items.RemoveAt(index);
             items.RemoveAt(index);
-        }
-
-
-        public IEnumerator<OrderItem> GetEnumerator()
-        {
-            return items.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return (items as IEnumerable).GetEnumerator();
         }
     }
 }

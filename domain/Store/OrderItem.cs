@@ -10,6 +10,7 @@ namespace Store
     public class OrderItem
     {
         private readonly OrderItemDto dto;
+
         public int BookId => dto.BookId;
 
         public int Count
@@ -22,6 +23,7 @@ namespace Store
                 dto.Count = value;
             }
         }
+
         public decimal Price
         {
             get => dto.Price;
@@ -36,9 +38,7 @@ namespace Store
         private static void ThrowIfInvalidCount(int count)
         {
             if (count <= 0)
-            {
                 throw new ArgumentOutOfRangeException("Count must be greater than zero.");
-            }
         }
 
         public static class DtoFactory
@@ -66,7 +66,5 @@ namespace Store
 
             public static OrderItemDto Map(OrderItem domain) => domain.dto;
         }
-
-
     }
 }
